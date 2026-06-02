@@ -1,0 +1,97 @@
+<?php
+$plik = "notes.txt";
+
+echo "<h2>System notatek</h2>";
+
+if(isset($_POST["akcja"])){
+    $akcja = $_POST["akcja"];
+
+    if($akcja == "dodaj"){
+        echo '
+            <form method="POST" action="">
+                <label for="notatka">Treść notatki:</label><br>
+                <textarea name="notatka" id="notatka"></textarea><br>
+                <input type="hidden" name="akcja" value="zapisz">
+                <input type="submit" value="Zapisz notatkę">
+            </form>
+        ';
+    }
+
+    if($akcja == "zapisz"){
+        if(!empty($_POST["notatka"])){
+            $notatka = "[" . date("Y-m-d H:i:s") . "] " . $_POST["notatka"] . "\n";
+
+            $uchwyt = fopen($plik, "a");
+
+            if($uchwyt){
+                fwrite($uchwyt, $notatka);
+                fclose($uchwyt);
+                echo "Notatka została dodana.<br>";
+            } else {
+                echo "Błąd: nie udało się otworzyć pliku do zapisu.<br>";
+            }
+        } else {
+            echo "Nie wpisano treści notatki.<br>";
+        }
+    }
+
+    if($akcja == "wyswietl"){
+        if(file_exists($plik) && filesize($plik) > 0){
+            $uchwyt = fopen($plik, "r");
+
+            if($uchwyt){
+                $numer = 1;
+
+                while(!feof($uchwyt)){
+                    $linia = fgets($uchwyt);
+
+                    if($linia != ""){
+                        echo $numer . ". " . htmlspecialchars($linia) . "<br>";
+                        $numer++;
+                    }
+                }
+
+                fclose($uchwyt);
+            } else {
+                echo "Błąd: nie udało się otworzyć pliku do odczytu.<br>";
+            }
+        } else {
+            echo "Brak notatek do wyświetlenia.<br>";
+        }
+    }
+
+    if($akcja == "usun"){
+        if(file_exists($plik)){
+            if(unlink($plik)){
+                echo "Wszystkie notatki zostały usunięte.<br>";
+            } else {
+                echo "Błąd: nie udało się usunąć pliku notes.txt.<br>";
+            }
+        } else {
+            echo "Plik notes.txt nie istnieje, więc nie ma czego usuwać.<br>";
+        }
+    }
+
+    if($akcja == "koniec"){
+        echo "Program został zakończony.<br>";
+    }
+}
+?>
+
+<hr>
+
+<form method="POST" action="">
+    <input type="radio" name="akcja" value="dodaj" id="dodaj">
+    <label for="dodaj">Dodaj nową notatkę</label><br>
+
+    <input type="radio" name="akcja" value="wyswietl" id="wyswietl">
+    <label for="wyswietl">Wyświetl wszystkie notatki</label><br>
+
+    <input type="radio" name="akcja" value="usun" id="usun">
+    <label for="usun">Usuń wszystkie notatki</label><br>
+
+    <input type="radio" name="akcja" value="koniec" id="koniec">
+    <label for="koniec">Zakończ program</label><br><br>
+
+    <input type="submit" value="Wykonaj">
+</form>
